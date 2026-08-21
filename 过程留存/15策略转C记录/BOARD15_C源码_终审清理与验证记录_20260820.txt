@@ -1,0 +1,66 @@
+BOARD15 C源码终审清理与验证记录
+日期：2026-08-20
+
+一、清理原则
+仅修改过期、冲突或可能误导工程师的注释；未修改任何C语句、函数签名、结构体、枚举、宏、常量、文件名或接口。
+
+二、注释清理
+- controller_api_BOARD15_V0_1.h: 删除“freeze candidate / not yet final package”等旧阶段注释，改为正式公共接口说明。
+- mode_control_BOARD15_C06_V0_3.c: 修正“FC16失败即丢弃candidate”的旧注释，明确pending由C10管理、成功commit才改变正式命令状态。
+- black_start_BOARD15_C07_V0_1.c: 修正S14阶段推进注释，明确FC16失败可保留同一Snapshot pending重试。
+- black_start_BOARD15_C07_V0_1.h: 明确S14阶段时间锚点只在candidate提交后成为正式状态。
+- controller_adapter_BOARD15_C10_V0_1.h: 删除旧V0.4点表字样；修正Runtime Reset、新Snapshot、CANDIDATE发布等生命周期注释。
+- p_execution_auxiliary_BOARD15_C04_V0_1.h: 删除Design05阶段标签，保留正式lifecycle规则。
+- mode_control_BOARD15_C06_V0_3.h: 删除旧V0.2阶段标签，保留正式S14请求规则。
+- project15_core_BOARD15_C09_V0_2.c: 修正candidate初始化注释，明确只在commit后成为official状态。
+- project15_core_BOARD15_C09_V0_2.h: 删除内部开发阶段表达，并明确FC16失败时pending可同Snapshot重试、并非失败即discard。
+
+三、代码等价性
+- 清理前后21个.c/.h逐文件GCC预处理输出完全一致：PASS（21/21）。
+- 清理前后全局导出符号/API集合完全一致：PASS。
+
+四、严格编译
+- GCC 14.2.0: -std=c99 -Wall -Wextra -Werror -pedantic，10/10 .c PASS，0 warning，0 error。
+- Clang: -std=c99 -Wall -Wextra -Werror -pedantic，10/10 .c PASS，0 warning，0 error。
+- 当前环境未安装AArch64交叉编译器，因此本轮不生成真实Board目标二进制；最终AArch64 Linux可执行程序仍由工程师在实际板端工程/工具链中整体编译链接。
+
+五、C10完整生命周期回归
+- Execution feedback decode: PASS
+- Candidate/retry/commit: PASS
+- Same-snapshot exact retry: PASS
+- New-snapshot stale abort: PASS
+- CMD_SEQ content semantics: PASS
+- Monitor-only observation: PASS
+- Measurement break/rebase: PASS
+- Runtime config validation: PASS
+- CONTROLLER_RESET_SEQ: PASS
+- Active master-change guard: PASS
+- External-control ready gate: PASS
+- C01-C10 strict linked build: PASS
+
+六、正式源码文件
+- 文件数：21（10个.c + 11个.h）
+- black_start_BOARD15_C07_V0_1.c  SHA256=cd95f75314af45e975ce35eb21b4fc7ec934fdfda9c07c58c67b398a623d08cb
+- black_start_BOARD15_C07_V0_1.h  SHA256=64b2d9d4ba1df8dbd582ba9d78fb5b25f10b5575e07c6622301b74982aebab4f
+- controller_adapter_BOARD15_C10_V0_1.c  SHA256=10b85e2856c2b4b867dcfd8af5b7bc745f31b6827451b71d220c931f76d187fe
+- controller_adapter_BOARD15_C10_V0_1.h  SHA256=903bfd14da7780a2e0d85e0a5c0f694955b7e670c3d3b9e08b10330874e9c079
+- controller_api_BOARD15_V0_1.h  SHA256=7d7dbdf605ba81db2c1671d5a2c1f9dd527722bfc6bff573777d1a070ed0d7dc
+- mode_control_BOARD15_C06_V0_3.c  SHA256=871832764ebefd670b101976f49c99e6a3af30e9c4d8d164830141907c601723
+- mode_control_BOARD15_C06_V0_3.h  SHA256=77f666d950dc338e651d80817556c01482ad2d5b8d56a9c611fcc453c4100867
+- p_coord_baseline_BOARD15_C03_V0_2.c  SHA256=8202251fed827fadff424bf5a06d8fb49b93511fe1d73d87087d3cb223937481
+- p_coord_baseline_BOARD15_C03_V0_2.h  SHA256=2973e999db5d6b66e142a6881b6ce97934a271000447a91a61d87b02951b0860
+- p_execution_auxiliary_BOARD15_C04_V0_1.c  SHA256=55c3234492b3348ba6ba03cadf02f9ed240d5e46bb2f51b7c9ae5d899ac850d2
+- p_execution_auxiliary_BOARD15_C04_V0_1.h  SHA256=68207bdcf772820235dbb2819531e94c655d7b1a966dadfb719089204757d6f8
+- p_objective_BOARD15_C02_V0_1.c  SHA256=e298c90d19ce0d8cb230c99b0c6db0d6deec38266946b984a62e5415eecbce86
+- p_objective_BOARD15_C02_V0_1.h  SHA256=8a8fa4b11035d9970e6ac86bb05dfb6dd07eefdcd0929c890cf17fa8e764d923
+- project15_core_BOARD15_C09_V0_2.c  SHA256=28564f038b6395c9e8912bf6eebf4219d9267a2760159d0c9729970f158c17e2
+- project15_core_BOARD15_C09_V0_2.h  SHA256=ccfd1ddb438919e991f2aa612ae9296c9b4f3a665360e4023b9ea695515de416
+- q_control_BOARD15_C05_V0_1.c  SHA256=3a0f1bd6aeb4883b90daf6d68b08bf52ce51cf7576c8afc1103a7a9df1bf2886
+- q_control_BOARD15_C05_V0_1.h  SHA256=4a4f2c5663adc8203385f33b368771923aaebfcd0af01367cff4073cc3b4dfb9
+- resynchronization_BOARD15_C08_V0_1.c  SHA256=51e41d57a0c7bcdf1a9ab5656609517dfcd6fa18f95173d9b5f7b76719a51265
+- resynchronization_BOARD15_C08_V0_1.h  SHA256=233578f3b72c393b12628edf3fadc6b394fb8a9b7e1fb008596a1073af48b979
+- strategy15_core_BOARD15_C01_V0_1.c  SHA256=90444af08b32cf6f0e5a804e0b774f097a4d31c4e9896ed3789251f31af3716c
+- strategy15_core_BOARD15_C01_V0_1.h  SHA256=74246ae86a26385400590c3ddbd4e9b0f62023402aadb3e846b3276257d9b01d
+
+正式源码压缩包：BOARD15_C源码_正式版_C01-C10_20260820_终审清洁版.zip
+SHA256=f4b19a44eeb3aaeb327d86d0924bde0f63d0706faeec192df6a97e3fedb53761
